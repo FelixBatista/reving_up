@@ -46,6 +46,18 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void _updateMaxRPM() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        maxRPM = int.parse(_maxRPMController.text);
+      });
+      // Optionally, provide feedback to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Maximum RPM updated to $maxRPM')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     AudioService audioService = Provider.of<AudioService>(context);
@@ -78,13 +90,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   return null;
                 },
                 onFieldSubmitted: (value) {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      maxRPM = int.parse(value);
-                    });
-                  }
+                  _updateMaxRPM();
                 },
               ),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _updateMaxRPM,
+              child: Text('Set Maximum RPM'),
             ),
             SizedBox(height: 20),
             // Engine Selection Dropdown
