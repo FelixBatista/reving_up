@@ -11,7 +11,8 @@ Steps:
  */
 
 // can_bus_service.dart
-import 'package:flutter/services.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 abstract class CanBusService {
   Future<int> getEngineRPM();
@@ -29,5 +30,32 @@ class RealCanBusService implements CanBusService {
       print("Failed to get RPM: ${e.message}");
       return 0;
     }
+  }
+}
+
+class MockCanBusService implements CanBusService {
+  int currentRPM = 1000;
+  Timer? timer;
+
+  MockCanBusService() {
+    timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      // Simulate RPM changes
+      currentRPM += 100;
+      if (currentRPM > 8000) currentRPM = 1000;
+    });
+  }
+
+  @override
+  Future<int> getEngineRPM() async {
+    return currentRPM;
+  }
+}
+
+CanBusService getCanBusService() {
+  if (kIsWeb ||
+      !['android', 'ios'].contains(defaultTargetPlatform.toString().toLowerCase())) {
+    return MockCanBusService();
+  } else {
+    return RealCanBusService();
   }
 }
