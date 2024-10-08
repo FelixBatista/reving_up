@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'audio_service.dart';
 import 'ui/home_screen.dart';
-import 'can_bus_service.dart';
+//import 'can_bus_service.dart';
 import 'package:flutter_background/flutter_background.dart';
 
 void main() async {
