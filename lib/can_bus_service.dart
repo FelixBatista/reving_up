@@ -13,6 +13,7 @@ Steps:
 // can_bus_service.dart
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 abstract class CanBusService {
   Future<int> getEngineRPM();

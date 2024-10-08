@@ -12,7 +12,7 @@ void main() async {
   const androidConfig = FlutterBackgroundAndroidConfig(
     notificationTitle: "Revving Up",
     notificationText: "Engine sound is playing",
-    notificationImportance: AndroidNotificationImportance.Default,
+    notificationImportance: AndroidNotificationImportance.normal,
     enableWifiLock: true,
   );
 

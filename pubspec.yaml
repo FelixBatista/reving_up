@@ -9,9 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^0.20.1
-  provider: ^6.0.0
-  flutter_background: ^1.0.0
+  audioplayers:
+  provider:
+  flutter_background:
   # Add other dependencies as needed
 
 dev_dependencies:
@@ -22,5 +22,4 @@ flutter:
   assets:
     - assets/sounds/v12_f1_engine.mp3
     - assets/sounds/v8_engine.mp3
-    - assets/sounds/inline4_engine.mp3
     # Add other sound files
