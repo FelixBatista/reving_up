@@ -20,7 +20,7 @@ abstract class CanBusService {
 }
 
 class RealCanBusService implements CanBusService {
-  static const platform = MethodChannel('revving_up/canbus');
+  static const platform = MethodChannel('reving_up/canbus');
 
   @override
   Future<int> getEngineRPM() async {
@@ -39,7 +39,7 @@ class MockCanBusService implements CanBusService {
   Timer? timer;
 
   MockCanBusService() {
-    timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       // Simulate RPM changes
       currentRPM += 100;
       if (currentRPM > 8000) currentRPM = 1000;

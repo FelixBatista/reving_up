@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class AudioService with ChangeNotifier {
-  final AudioPlayer _audioPlayer = AudioPlayer(); // Use just_audio's AudioPlayer
+  final AudioPlayer _audioPlayer = AudioPlayer(); // Single audio player instance
   String _currentEngineFolder = 'v8_mustang'; // Default engine folder
   double _volume = 0.5;
   int _userMaxRPM = 8000; // Default max RPM set by the user
   double _previousVolume = 0.5; // Store previous volume before muting
   int _currentSnippet = 1; // For managing sound snippets
+  final int _soundMaxRPM = 8000; // Max RPM value for the sound file
 
   double get volume => _volume;
   String get currentEngineFolder => _currentEngineFolder;
@@ -16,9 +17,10 @@ class AudioService with ChangeNotifier {
     _initialize();
   }
 
-  // Initialize the audio player with the default sound and prepare for gap-less playback
+  // Initialize the audio player with the default sound
   void _initialize() async {
-    _audioPlayer.setVolume(_volume);
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await _audioPlayer.setVolume(_volume);
     await preloadAllSnippets(); // Preload all snippets at startup
     await playSoundSnippet(_currentSnippet); // Play the default snippet
   }
@@ -26,8 +28,8 @@ class AudioService with ChangeNotifier {
   // Preload all snippets to avoid gaps during transitions
   Future<void> preloadAllSnippets() async {
     for (int i = 1; i <= 10; i++) {
-      String fileName = 'sounds/$_currentEngineFolder/acc_$i.mp3';
-      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse('asset:///$fileName')));
+      String fileName = 'sounds/$_currentEngineFolder/acc_$i.wav';
+      await _audioPlayer.setSource(AssetSource(fileName)); // Preload the sound
     }
   }
 
@@ -71,42 +73,28 @@ class AudioService with ChangeNotifier {
     // Only change the snippet if the snippet number has changed
     if (_currentSnippet != snippet) {
       _currentSnippet = snippet;
-      // Play without crossfade
-  //    await playSoundSnippet(snippet);
-      // Play with crossfade
-      await playSoundSnippetWithCrossfade(snippet);
+      await playSoundSnippet(snippet); // Play the corresponding snippet
     }
   }
 
-
-      //Play without crossfade
   // Helper method to play a sound snippet based on the selected engine and snippet number
   Future<void> playSoundSnippet(int snippet) async {
-    String fileName = 'sounds/$_currentEngineFolder/acc_$snippet.mp3';
+    String fileName = 'sounds/$_currentEngineFolder/acc_$snippet.wav';
 
-    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse('asset:///$fileName')));
-    await _audioPlayer.setLoopMode(LoopMode.one); // Ensure gap-less looping
-    await _audioPlayer.play(); // Start playback
-  }
-
-    //play with cross-fade
-// Helper method to play a sound snippet with manual cross-fade
-  Future<void> playSoundSnippetWithCrossfade(int snippet) async {
-    // Fade out the current snippet
+    // Fade out current snippet
     await fadeOut();
 
-    String fileName = 'sounds/$_currentEngineFolder/acc_$snippet.mp3';
-
-    // Load the new snippet
-    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse('asset:///$fileName')));
-    await _audioPlayer.setLoopMode(LoopMode.one); // Ensure gap-less looping
+    // Preload the new sound snippet
+    await _audioPlayer.setSource(AssetSource(fileName));
 
     // Fade in the new snippet
     await fadeIn();
-    await _audioPlayer.play(); // Start playback
+
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop); // Loop the snippet
+    await _audioPlayer.resume(); // Resume playback to avoid interruption
   }
 
-  // Helper method to fade out the volume
+// Helper method to fade out the volume
   Future<void> fadeOut() async {
     double volume = _volume;
     while (volume > 0) {
@@ -116,7 +104,7 @@ class AudioService with ChangeNotifier {
     }
   }
 
-  // Helper method to fade in the volume
+// Helper method to fade in the volume
   Future<void> fadeIn() async {
     double volume = 0.0;
     while (volume < _volume) {
@@ -125,4 +113,5 @@ class AudioService with ChangeNotifier {
       await Future.delayed(Duration(milliseconds: 100));
     }
   }
+
 }

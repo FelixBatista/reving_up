@@ -1,0 +1,43 @@
+import 'package:audioplayers/audioplayers.dart';
+
+class EngineSoundManager {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final int maxRPM; // The max RPM value provided by the user
+  int _currentSnippet = 1;
+
+  EngineSoundManager(this.maxRPM);
+
+  // Method to get the snippet number for the current RPM
+  int getSnippetForRPM(int currentRPM) {
+    int segment = (currentRPM / maxRPM * 10).ceil();
+    return segment.clamp(1, 10); // Ensure it's between 1 and 10
+  }
+
+  // Method to play the corresponding sound snippet for the given RPM
+  Future<void> playSoundForRPM(int currentRPM) async {
+    int snippet = getSnippetForRPM(currentRPM);
+
+    if (_currentSnippet != snippet) {
+      _currentSnippet = snippet;
+      //String fileName = 'assets/sounds/v8_mustang/v8mustang_acc_$snippet.wav';
+      String fileName = 'assets/sounds/v8_mustang/v8mustang_acc_10.wav';
+
+      // Use play() directly with the source, eliminating the need for setSource()
+      await _audioPlayer.play(AssetSource(fileName), volume: 1.0);
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop); // Loop the snippet
+    }
+  }
+
+  // Method to stop the sound
+  void stop() {
+    _audioPlayer.stop();
+  }
+
+  // Method to set the volume
+  void setVolume(double volume) {
+    _audioPlayer.setVolume(volume); // Adjusts the volume on the audio player
+  }
+
+  // Public getter for the audio player
+  AudioPlayer get audioPlayer => _audioPlayer;
+}

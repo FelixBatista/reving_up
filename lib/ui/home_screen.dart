@@ -1,19 +1,21 @@
-// home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../audio_service.dart';
 import '../can_bus_service.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  String selectedEngine = 'V12 F1';
+class HomeScreenState extends State<HomeScreen> {
+  String selectedEngine = 'v8_mustang';
   double volume = 0.5;
   int currentRPM = 0;
   int maxRPM = 8000; // Default max RPM
+  late AudioService audioService; // Make AudioService a class-level variable
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _maxRPMController = TextEditingController();
@@ -22,27 +24,29 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _maxRPMController.text = maxRPM.toString();
+    audioService = Provider.of<AudioService>(context, listen: false);
     // Start listening to RPM updates
     startRPMListener();
   }
 
   void startRPMListener() async {
-    CanBusService canBus = getCanBusService();
-    AudioService audioService = Provider.of<AudioService>(context, listen: false);
+    CanBusService canBus = getCanBusService(); // Assume you have this setup
 
     while (true) {
-      int rpm = await canBus.getEngineRPM();
+      int rpm = await canBus.getEngineRPM(); // Assume this gets the current RPM from CAN bus
       setState(() {
         currentRPM = rpm;
       });
-      audioService.updateRPM(rpm, maxRPM);
-      await Future.delayed(Duration(milliseconds: 100)); // Adjust as needed
+      // Play the correct sound snippet based on RPM
+      audioService.playSoundForRPM(rpm);
+      await Future.delayed(const Duration(milliseconds: 100)); // Adjust as needed
     }
   }
 
   @override
   void dispose() {
     _maxRPMController.dispose();
+    audioService.stopEngine(); // Stop the engine sound when the screen is disposed
     super.dispose();
   }
 
@@ -51,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         maxRPM = int.parse(_maxRPMController.text);
       });
-      // Optionally, provide feedback to the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Maximum RPM updated to $maxRPM')),
       );
@@ -63,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     AudioService audioService = Provider.of<AudioService>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Revving Up'),
+        title: const Text('Revving Up'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -75,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: TextFormField(
                 controller: _maxRPMController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Maximum RPM',
                   border: OutlineInputBorder(),
                 ),
@@ -94,22 +97,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _updateMaxRPM,
-              child: Text('Set Maximum RPM'),
+              child: const Text('Set Maximum RPM'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Engine Selection Dropdown
             DropdownButton<String>(
               value: selectedEngine,
               onChanged: (String? newValue) {
                 setState(() {
                   selectedEngine = newValue!;
-                  audioService.selectEngine(newValue);
+                  audioService.selectEngine(newValue); // Update selected engine in AudioService
                 });
               },
-              items: <String>['V12 F1', 'V8', 'Inline-4']
+              items: <String>['V12 F1', 'v8_mustang', 'Inline-4']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -117,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Volume Slider
             Slider(
               value: volume,
@@ -128,23 +131,24 @@ class _HomeScreenState extends State<HomeScreen> {
               onChanged: (double value) {
                 setState(() {
                   volume = value;
-                  audioService.setVolume(value);
+                  audioService.setVolume(value); // Adjust the volume in AudioService
                 });
               },
             ),
-            SizedBox(height: 20),
-            // Turn Off Button
-            ElevatedButton(
+            const SizedBox(height: 20),
+            // Turn off button
+            ElevatedButton.icon(
               onPressed: () {
-                audioService.stopEngine();
+                audioService.toggleVolume(); // Toggle volume mute/un-mute
               },
-              child: Text('Turn Off'),
+              icon: Icon(audioService.volume > 0 ? Icons.volume_off : Icons.volume_up),
+              label: Text(audioService.volume > 0 ? 'Turn Off' : 'Turn On'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Current RPM Display
             Text(
               'Current RPM: $currentRPM',
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
             ),
           ],
         ),

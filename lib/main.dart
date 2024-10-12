@@ -1,9 +1,7 @@
-// main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'audio_service.dart';
 import 'ui/home_screen.dart';
-//import 'can_bus_service.dart';
 import 'package:flutter_background/flutter_background.dart';
 
 void main() async {
@@ -22,10 +20,26 @@ void main() async {
     await FlutterBackground.enableBackgroundExecution();
   }
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
+/*
+//To test app
+class AudioService with ChangeNotifier {
+  double _volume = 0.5;
+
+  double get volume => _volume;
+
+  void setVolume(double newVolume) {
+    _volume = newVolume;
+    notifyListeners(); // Notifies all listeners about the change
+  }
+}
+*/
+
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -35,7 +49,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: HomeScreen(),
+        home: const HomeScreen(),
       ),
     );
   }
