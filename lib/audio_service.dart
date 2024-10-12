@@ -72,9 +72,9 @@ class AudioService with ChangeNotifier {
     if (_currentSnippet != snippet) {
       _currentSnippet = snippet;
       // Play without crossfade
-  //    await playSoundSnippet(snippet);
+      await playSoundSnippet(snippet);
       // Play with crossfade
-      await playSoundSnippetWithCrossfade(snippet);
+  //    await playSoundSnippetWithCrossfade(snippet);
     }
   }
 
@@ -84,10 +84,11 @@ class AudioService with ChangeNotifier {
   Future<void> playSoundSnippet(int snippet) async {
     String fileName = 'sounds/$_currentEngineFolder/acc_$snippet.mp3';
 
-    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse('asset:///$fileName')));
-    await _audioPlayer.setLoopMode(LoopMode.one); // Ensure gap-less looping
+    await _audioPlayer.setAsset('assets/$fileName');
+    await _audioPlayer.setLoopMode(LoopMode.all); // Ensure gap-less looping
     await _audioPlayer.play(); // Start playback
   }
+
 
     //play with cross-fade
 // Helper method to play a sound snippet with manual cross-fade
@@ -98,8 +99,8 @@ class AudioService with ChangeNotifier {
     String fileName = 'sounds/$_currentEngineFolder/acc_$snippet.mp3';
 
     // Load the new snippet
-    await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse('asset:///$fileName')));
-    await _audioPlayer.setLoopMode(LoopMode.one); // Ensure gap-less looping
+    await _audioPlayer.setAsset('assets/$fileName');
+    await _audioPlayer.setLoopMode(LoopMode.all); // Ensure gap-less looping
 
     // Fade in the new snippet
     await fadeIn();
